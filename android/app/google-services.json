@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "684616021017",
+    "project_id": "whasappbackend",
+    "storage_bucket": "whasappbackend.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:684616021017:android:7efc83df4b8b407150e688",
+        "android_client_info": {
+          "package_name": "com.example.whatsapp_clone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "684616021017-qi5pntliiuj6qvq2jq44i2rftks0cm5j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPl-zMxyleSVSYLtE1XdTxJkpNQj2Ryq0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "684616021017-qi5pntliiuj6qvq2jq44i2rftks0cm5j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
