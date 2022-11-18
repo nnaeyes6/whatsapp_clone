@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:whatsapp_clone/core/common_widgets/custom_button.dart';
 import 'package:whatsapp_clone/core/common_widgets/ktext.dart';
 import 'package:whatsapp_clone/core/constants/colors.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:whatsapp_clone/core/utils/util_snackbar.dart';
+import 'package:whatsapp_clone/featutes/auth/controller/auth_controller.dart';
 import 'package:whatsapp_clone/router.dart' as route;
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController phoneController = TextEditingController();
   Country? countries;
 
@@ -34,6 +37,17 @@ class _LoginScreenState extends State<LoginScreen> {
         // print('Select country: ${_country.displayName}');
       },
     );
+  }
+
+  void sendOTP() {
+    String phoneNumber = phoneController.text.trim();
+    if (countries != null && phoneNumber.isNotEmpty) {
+      ref
+          .read(authControllerProvider)
+          .signInWithPhoneNum(context, '+ ${countries!.phoneCode}$phoneNumber');
+    } else {
+      showSnackBar(context: context, content: 'fill in all required fields');
+    }
   }
 
   @override
@@ -90,7 +104,6 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 children: [
                   if (countries != null)
-                    // Text('+${countries!.countryCode}'),
                     KText(
                         text: '+${countries!.phoneCode}',
                         size: 16,
@@ -103,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: size.width * 0.7,
                       child: TextField(
                         controller: phoneController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: 'phone number',
                         ),
                       )),
@@ -112,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: size.height * 0.5),
               SizedBox(
                 width: 90,
-                child: CustomButton(text: 'NEXT', onPressed: () {}),
+                child: CustomButton(text: 'NEXT', onPressed: sendOTP),
               ),
             ],
           ),
