@@ -35,6 +35,23 @@ class AuthRepository {
       showSnackBar(context: context, content: e.message!);
     }
   }
+
+  void verifyOTP({
+    required BuildContext context,
+    required String verificationId,
+    required String userOTP,
+  }) async {
+    try {
+      PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
+          verificationId: verificationId, smsCode: userOTP);
+      await auth.signInWithCredential(phoneAuthCredential);
+      // ignore: use_build_context_synchronously
+      Navigator.pushNamedAndRemoveUntil(
+          context, route.userInformationScreen, (route) => false);
+    } on FirebaseAuthException catch (e) {
+      showSnackBar(context: context, content: e.message!);
+    }
+  }
 }
 
 final authRepositoryProvider = Provider((ref) => AuthRepository(

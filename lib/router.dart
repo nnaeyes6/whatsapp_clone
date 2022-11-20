@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/core/common_widgets/default_error_screen.dart';
 import 'package:whatsapp_clone/featutes/screens/page_screens/auth_screens/login_screens.dart';
 import 'package:whatsapp_clone/featutes/screens/page_screens/auth_screens/otp_screen.dart';
+import 'package:whatsapp_clone/featutes/screens/page_screens/auth_screens/user_info_screen.dart';
 import 'package:whatsapp_clone/featutes/screens/page_screens/landing_screens.dart';
 import 'package:whatsapp_clone/featutes/screens/page_screens/mobile_chat_screen.dart';
 import 'featutes/screens/page_screens/layout_screens/mobile_layout_screen.dart';
@@ -11,6 +12,7 @@ const String landingScreen = 'landing-screen';
 const String mobileLayoutScreen = 'mobile-layout-screen';
 const String mobileChatScreen = 'mobile-chat-screen';
 const String otpScreen = 'opt-screen';
+const String userInformationScreen = 'user-info-screen';
 
 Route<dynamic> controller(RouteSettings settings) {
   switch (settings.name) {
@@ -29,6 +31,9 @@ Route<dynamic> controller(RouteSettings settings) {
           builder: (context) => OTPScreen(
                 verificationId: verificationId,
               ));
+    case userInformationScreen:
+      return MaterialPageRoute(
+          builder: (context) => const UserInformationScreen());
     default:
       return MaterialPageRoute(
         builder: ((context) => const Scaffold(

@@ -5,7 +5,7 @@ import 'package:whatsapp_clone/core/common_widgets/ktext.dart';
 import 'package:whatsapp_clone/core/constants/colors.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:whatsapp_clone/core/utils/util_snackbar.dart';
-import 'package:whatsapp_clone/featutes/auth/controller/auth_controller.dart';
+import 'package:whatsapp_clone/featutes/auth/controller/auth_controller_riverpod.dart';
 import 'package:whatsapp_clone/router.dart' as route;
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -56,12 +56,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: backgroundColor,
-        title: const KText(
-          text: 'Enter your phone number',
-          size: 18,
-          fontWeight: FontWeight.w600,
-          color: whiteColor,
-          textAlign: TextAlign.center,
+        title: const Padding(
+          padding: EdgeInsets.only(left: 15),
+          child: KText(
+            text: 'Enter your phone number',
+            size: 18,
+            fontWeight: FontWeight.w600,
+            color: whiteColor,
+            textAlign: TextAlign.center,
+          ),
         ),
         leading: IconButton(
           onPressed: () {
@@ -115,6 +118,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   SizedBox(
                       width: size.width * 0.7,
                       child: TextField(
+                        keyboardType: TextInputType.number,
                         controller: phoneController,
                         decoration: const InputDecoration(
                           hintText: 'phone number',

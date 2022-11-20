@@ -13,7 +13,21 @@ class AuthController {
   AuthController({
     required this.authRepository,
   });
-  void signInWithPhoneNum(BuildContext context, String phoneNumber) {
-    authRepository.signInWithPhone(context, phoneNumber);
+  void signInWithPhoneNum(
+    BuildContext context,
+    String phoneNumber,
+  ) {
+    authRepository.signInWithPhone(
+      context,
+      phoneNumber,
+    );
+  }
+
+  void verifyOTP(BuildContext context, String userOTP, String verificationId) {
+    authRepository.verifyOTP(
+      context: context,
+      verificationId: verificationId,
+      userOTP: userOTP,
+    );
   }
 }
