@@ -38,6 +38,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.1.1
+  image_picker: ^0.8.6
 
 dev_dependencies:
   flutter_lints: ^2.0.0

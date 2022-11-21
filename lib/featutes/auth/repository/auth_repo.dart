@@ -1,10 +1,14 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:whatsapp_clone/core/common_widgets/repository/common_firebase_storage_repo.dart';
 import 'package:whatsapp_clone/core/utils/util_snackbar.dart';
+import 'package:whatsapp_clone/model/user_model.dart';
 import 'package:whatsapp_clone/router.dart' as route;
 
 class AuthRepository {
@@ -50,6 +54,38 @@ class AuthRepository {
           context, route.userInformationScreen, (route) => false);
     } on FirebaseAuthException catch (e) {
       showSnackBar(context: context, content: e.message!);
+    }
+  }
+
+  void saveUserProfileToFirebaseFirestore({
+    required String name,
+    required File? profilePic,
+    required ProviderRef ref,
+    required BuildContext context,
+  }) async {
+    try {
+      String uid = auth.currentUser!.uid;
+      String photoURL =
+          'https://toppng.com/uploads/preview/instagram-default-profile-picture-11562973083brycehrmyv.png';
+      if (profilePic != null) {
+        photoURL = await ref
+            .read(commonFirebaseStorageRepositoryProvider)
+            .storeFileToFirebase('profilePic/$uid', profilePic);
+      }
+      var user = UserModel(
+        name: name,
+        profilePic: photoURL,
+        uid: uid,
+        isOnline: true,
+        phoneNumber: auth.currentUser!.uid,
+        groupId: [],
+      );
+      await firestore.collection('users').doc(uid).set(user.toMap());
+      // ignore: use_build_context_synchronously
+      Navigator.pushNamedAndRemoveUntil(
+          context, route.mobileLayoutScreen, (route) => false);
+    } catch (e) {
+      showSnackBar(context: context, content: e.toString());
     }
   }
 }

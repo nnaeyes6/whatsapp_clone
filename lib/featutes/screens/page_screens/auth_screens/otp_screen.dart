@@ -68,10 +68,8 @@ class OTPScreen extends ConsumerWidget {
                   child: TextField(
                     onChanged: ((value) {
                       if (value.length == 6) {
-                        print('verify otp');
                         verifyOTP(ref, context, value.trim());
                       }
-                      print('Value was run');
                     }),
                     textAlign: TextAlign.center,
                     keyboardType: TextInputType.number,
