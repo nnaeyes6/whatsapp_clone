@@ -2,10 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:whatsapp_clone/core/common_widgets/repository/common_firebase_storage_repo.dart';
 import 'package:whatsapp_clone/core/utils/util_snackbar.dart';
 import 'package:whatsapp_clone/featutes/auth/controller/auth_controller_riverpod.dart';
-import 'package:whatsapp_clone/router.dart';
 
 class UserInformationScreen extends ConsumerStatefulWidget {
   const UserInformationScreen({super.key});
