@@ -4,81 +4,95 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:whatsapp_clone/core/common_widgets/repository/common_firebase_storage_repo.dart';
-import 'package:whatsapp_clone/core/utils/util_snackbar.dart';
 import 'package:whatsapp_clone/model/user_model.dart';
-import 'package:whatsapp_clone/router.dart' as route;
+
+final authRepositoryProvider = Provider(
+  (ref) {
+    final storage = ref.read(commonFirebaseStorageRepositoryProvider);
+    return AuthRepository(
+      auth: FirebaseAuth.instance,
+      firestore: FirebaseFirestore.instance,
+      firebaseStorage: storage,
+    );
+  },
+);
 
 class AuthRepository {
-  final FirebaseAuth auth;
-  final FirebaseFirestore firestore;
   AuthRepository({
     required this.auth,
     required this.firestore,
+    required this.firebaseStorage,
   });
-  Future<UserModel?> getCurrentUserData() async {
-    var userData =
-        await firestore.collection('users').doc(auth.currentUser?.uid).get();
-    UserModel? user;
+
+  final FirebaseAuth auth;
+  final FirebaseFirestore firestore;
+  final CommonFirebaseStorageRepository firebaseStorage;
+
+  Future<UserModel> getCurrentUserData() async {
+    var userData = await firestore //
+        .collection('users')
+        .doc(auth.currentUser?.uid)
+        .get();
     if (userData.data() != null) {
-      user = UserModel.fromMap(userData.data()!);
+      return UserModel.fromMap(userData.data()!);
+    } else {
+      return UserModel.none;
     }
-    return user;
   }
 
-  void signInWithPhone(BuildContext context, String phoneNumber) async {
+  Future<void> signOut() async {
+    await auth.signOut();
+  }
+
+  Future<void> signInWithPhone(
+    String phoneNumber, {
+    required PhoneCodeSent onCodeSent,
+  }) async {
     try {
       await auth.verifyPhoneNumber(
-          phoneNumber: phoneNumber,
-          codeAutoRetrievalTimeout: (String verificationId) {},
-          codeSent: (String verificationId, int? forceResendingToken) async {
-            Navigator.pushNamed(context, route.otpScreen,
-                arguments: verificationId);
-          },
-          verificationCompleted:
-              (PhoneAuthCredential phoneAuthCredential) async {
-            await auth.signInWithCredential(phoneAuthCredential);
-          },
-          verificationFailed: (FirebaseAuthException e) {
-            throw Exception(e.message);
-          });
+        phoneNumber: phoneNumber,
+        codeAutoRetrievalTimeout: (String verificationId) {},
+        codeSent: onCodeSent,
+        verificationCompleted: (PhoneAuthCredential phoneAuthCredential) {
+          auth.signInWithCredential(phoneAuthCredential);
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          throw e;
+        },
+      );
     } on FirebaseAuthException catch (e) {
-      showSnackBar(context: context, content: e.message!);
+      throw AuthException.fromFirebase(e);
     }
   }
 
-  void verifyOTP({
-    required BuildContext context,
+  Future<void> verifyOTP({
     required String verificationId,
     required String userOTP,
   }) async {
     try {
-      PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
-          verificationId: verificationId, smsCode: userOTP);
-      await auth.signInWithCredential(phoneAuthCredential);
-      // ignore: use_build_context_synchronously
-      Navigator.pushNamedAndRemoveUntil(
-          context, route.userInformationScreen, (route) => false);
+      await auth.signInWithCredential(
+        PhoneAuthProvider.credential(
+          verificationId: verificationId,
+          smsCode: userOTP,
+        ),
+      );
     } on FirebaseAuthException catch (e) {
-      showSnackBar(context: context, content: e.message!);
+      throw AuthException.fromFirebase(e);
     }
   }
 
-  void saveUserProfileToFirebaseFirestore({
+  Future<void> saveUserProfileToFirebaseFirestore({
     required String name,
     required File? profilePic,
-    required ProviderRef ref,
-    required BuildContext context,
   }) async {
     try {
       String uid = auth.currentUser!.uid;
-      String photoURL =
-          'https://toppng.com/uploads/preview/instagram-default-profile-picture-11562973083brycehrmyv.png';
+      String photoURL = 'https://toppng.com/uploads/preview'
+          '/instagram-default-profile-picture-11562973083brycehrmyv.png';
       if (profilePic != null) {
-        photoURL = await ref
-            .read(commonFirebaseStorageRepositoryProvider)
+        photoURL = await firebaseStorage //
             .storeFileToFirebase('profilePic/$uid', profilePic);
       }
       var user = UserModel(
@@ -87,17 +101,26 @@ class AuthRepository {
         uid: uid,
         isOnline: true,
         phoneNumber: auth.currentUser!.uid,
-        groupId: [],
+        groupId: const [],
       );
       await firestore.collection('users').doc(uid).set(user.toMap());
-      // ignore: use_build_context_synchronously
-      Navigator.pushNamedAndRemoveUntil(
-          context, route.mobileLayoutScreen, (route) => false);
-    } catch (e) {
-      showSnackBar(context: context, content: e.toString());
+    } on FirebaseAuthException catch (e) {
+      throw AuthException.fromFirebase(e);
     }
   }
 }
 
-final authRepositoryProvider = Provider((ref) => AuthRepository(
-    auth: FirebaseAuth.instance, firestore: FirebaseFirestore.instance));
+class AuthException implements Exception {
+  const AuthException(this.message, this.cause);
+
+  factory AuthException.fromFirebase(FirebaseAuthException e) {
+    return AuthException(e.message ?? e.toString(), e);
+  }
+
+  final dynamic cause;
+
+  final String message;
+
+  @override
+  String toString() => message;
+}

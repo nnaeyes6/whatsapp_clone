@@ -1,56 +1,88 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:whatsapp_clone/core/utils/util_snackbar.dart';
 import 'package:whatsapp_clone/featutes/auth/repository/auth_repo.dart';
 import 'package:whatsapp_clone/model/user_model.dart';
 
-final authControllerProvider = Provider((ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
-  return AuthController(authRepository: authRepository, ref: ref);
-});
-final userDataAuthProvider = FutureProvider((ref) {
-  // change here if it breaks
-
+final userDataAuthProvider = Provider<UserModel>((ref) {
   final userAuthController = ref.watch(authControllerProvider);
-  return userAuthController.getUserData();
+  return userAuthController.currentUser;
+});
+
+final authControllerProvider = StateProvider((ref) {
+  final authRepository = ref.read(authRepositoryProvider);
+  return AuthController(authRepository: authRepository, ref: ref);
 });
 
 class AuthController {
-  final ProviderRef ref;
-  final AuthRepository authRepository;
   AuthController({
     required this.ref,
     required this.authRepository,
   });
-  Future<UserModel?> getUserData() async {
-    UserModel? user = await authRepository.getCurrentUserData();
-    return user;
+
+  final StateProviderRef ref;
+  final AuthRepository authRepository;
+
+  late UserModel _currentUser;
+
+  UserModel get currentUser => _currentUser;
+
+  Future<void> init() async {
+    _currentUser = await authRepository.getCurrentUserData();
   }
 
-  void signInWithPhoneNum(
-    BuildContext context,
-    String phoneNumber,
-  ) {
+  void logOut() {
+    authRepository.signOut();
+    _currentUser = UserModel.none;
+    ref.notifyListeners();
+  }
+
+  Future<void> _updateUser() async {
+    _currentUser = await authRepository.getCurrentUserData();
+    ref.notifyListeners();
+  }
+
+  /// Returns verificationId
+  Future<String> signInWithPhoneNum(String phoneNumber) {
+    final completer = Completer<String>();
     authRepository.signInWithPhone(
-      context,
       phoneNumber,
-    );
+      onCodeSent: (String verificationId, int? forceResendingToken) {
+        completer.complete(verificationId);
+      },
+    ).catchError((error, stackTrace) {
+      completer.completeError(error, stackTrace);
+    });
+    return completer.future;
   }
 
-  void verifyOTP(BuildContext context, String userOTP, String verificationId) {
-    authRepository.verifyOTP(
-      context: context,
-      verificationId: verificationId,
-      userOTP: userOTP,
-    );
+  Future<void> verifyOTP(BuildContext context, String userOTP, String verificationId) async {
+    try {
+      await authRepository.verifyOTP(
+        verificationId: verificationId,
+        userOTP: userOTP,
+      );
+      await _updateUser();
+    } catch (e) {
+      showSnackBar(context: context, content: e.toString());
+    }
   }
 
-  void saveUserDataToFirebase(
-      BuildContext context, File? profilePic, String name) {
-    authRepository.saveUserProfileToFirebaseFirestore(
-        name: name, profilePic: profilePic, ref: ref, context: context);
+  Future<bool> saveUserDataToFirebase(BuildContext context, File? profilePic, String name) async {
+    try {
+      await authRepository.saveUserProfileToFirebaseFirestore(
+        name: name,
+        profilePic: profilePic,
+      );
+      await _updateUser();
+      return true;
+    } catch (e) {
+      showSnackBar(context: context, content: e.toString());
+      return false;
+    }
   }
 }

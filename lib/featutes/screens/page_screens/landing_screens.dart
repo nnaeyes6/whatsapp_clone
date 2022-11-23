@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/core/common_widgets/custom_button.dart';
-import 'package:whatsapp_clone/core/constants/colors.dart';
 import 'package:whatsapp_clone/core/common_widgets/ktext.dart';
+import 'package:whatsapp_clone/core/constants/colors.dart';
 import 'package:whatsapp_clone/router.dart' as route;
 
 class LandingScreen extends StatelessWidget {
@@ -20,10 +20,7 @@ class LandingScreen extends StatelessWidget {
             ),
             const Center(
               child: KText(
-                  text: "Welcome to Whatsapp",
-                  size: 35,
-                  fontWeight: FontWeight.bold,
-                  color: null),
+                  text: "Welcome to Whatsapp", size: 35, fontWeight: FontWeight.bold, color: null),
             ),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.12,
@@ -52,12 +49,12 @@ class LandingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             SizedBox(
-                width: 300,
-                child: CustomButton(
-                    text: "AGREE AND CONTINUE",
-                    onPressed: () {
-                      Navigator.pushNamed(context, route.loginScreen);
-                    })),
+              width: 300,
+              child: CustomButton(
+                text: "AGREE AND CONTINUE",
+                onPressed: () => context.navigateToLogin(),
+              ),
+            ),
           ],
         ),
       )),

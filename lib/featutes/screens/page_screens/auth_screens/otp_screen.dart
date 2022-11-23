@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:whatsapp_clone/featutes/auth/controller/auth_controller_riverpod.dart';
 import 'package:whatsapp_clone/router.dart' as route;
@@ -9,15 +10,14 @@ import '../../../../core/constants/colors.dart';
 
 class OTPScreen extends ConsumerWidget {
   final String verificationId;
+
   const OTPScreen({
     Key? key,
     required this.verificationId,
   }) : super(key: key);
 
   void verifyOTP(WidgetRef ref, BuildContext context, String userOTP) {
-    ref
-        .read(authControllerProvider)
-        .verifyOTP(context, userOTP, verificationId);
+    ref.read(authControllerProvider).verifyOTP(context, userOTP, verificationId);
   }
 
   @override
@@ -38,9 +38,7 @@ class OTPScreen extends ConsumerWidget {
             ),
           ),
           leading: IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, route.landingScreen);
-            },
+            onPressed: () => context.clearToHome(),
             icon: const Icon(Icons.arrow_back_ios),
           ),
         ),
@@ -66,13 +64,18 @@ class OTPScreen extends ConsumerWidget {
                 width: size.width * 0.5,
                 child: Center(
                   child: TextField(
-                    onChanged: ((value) {
-                      if (value.length == 6) {
-                        verifyOTP(ref, context, value.trim());
+                    onChanged: (String value) {
+                      final otp = value.trim();
+                      if (otp.length == 6) {
+                        verifyOTP(ref, context, otp);
                       }
-                    }),
+                    },
                     textAlign: TextAlign.center,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                      LengthLimitingTextInputFormatter(6),
+                    ],
                     decoration: const InputDecoration(
                       hintText: '- - - - - -',
                       hintStyle: TextStyle(
@@ -80,6 +83,10 @@ class OTPScreen extends ConsumerWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                    autofillHints: const [
+                      AutofillHints.oneTimeCode,
+                    ],
+                    // autocorrect: false,
                   ),
                 ),
               ),

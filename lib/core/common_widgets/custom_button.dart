@@ -17,7 +17,7 @@ class CustomButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xff8388C9),
+          backgroundColor: const Color(0xff8388C9),
           minimumSize: const Size(double.infinity, 50)),
       child: Text(
         text,

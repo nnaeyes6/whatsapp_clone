@@ -4,35 +4,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:whatsapp_clone/core/utils/util_snackbar.dart';
 import 'package:whatsapp_clone/featutes/auth/controller/auth_controller_riverpod.dart';
+import 'package:whatsapp_clone/router.dart';
 
 class UserInformationScreen extends ConsumerStatefulWidget {
   const UserInformationScreen({super.key});
 
   @override
-  ConsumerState<UserInformationScreen> createState() =>
-      _UserInformationScreenState();
+  ConsumerState<UserInformationScreen> createState() => _UserInformationScreenState();
 }
 
 class _UserInformationScreenState extends ConsumerState<UserInformationScreen> {
-  File? image;
   final TextEditingController nameController = TextEditingController();
+  File? image;
+
   @override
   void dispose() {
     nameController.dispose();
     super.dispose();
   }
 
-  void selectedImage() async {
-    image = await pickImageFromGalerry(context);
-    setState(() {});
+  Future<void> _selectedImage() async {
+    final pickedImage = await pickImageFromGalerry(context);
+    setState(() => image = pickedImage);
   }
 
-  void storeUserData() async {
+  Future<void> _storeUserData() async {
     String name = nameController.text.trim();
     if (name.isNotEmpty) {
-      ref
+      final successful = await ref //
           .read(authControllerProvider)
           .saveUserDataToFirebase(context, image, name);
+      if(successful && mounted) {
+        context.navigateToMobileLayout();
+      }
     }
   }
 
@@ -59,7 +63,7 @@ class _UserInformationScreenState extends ConsumerState<UserInformationScreen> {
                   bottom: -10,
                   left: 70,
                   child: IconButton(
-                    onPressed: selectedImage,
+                    onPressed: _selectedImage,
                     icon: const Icon(Icons.add_a_photo_rounded),
                   ),
                 ),
@@ -78,7 +82,7 @@ class _UserInformationScreenState extends ConsumerState<UserInformationScreen> {
                   ),
                 ),
                 IconButton(
-                  onPressed: storeUserData,
+                  onPressed: _storeUserData,
                   icon: const Icon(Icons.done),
                 ),
               ],

@@ -1,9 +1,9 @@
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:whatsapp_clone/core/common_widgets/custom_button.dart';
 import 'package:whatsapp_clone/core/common_widgets/ktext.dart';
 import 'package:whatsapp_clone/core/constants/colors.dart';
-import 'package:country_picker/country_picker.dart';
 import 'package:whatsapp_clone/core/utils/util_snackbar.dart';
 import 'package:whatsapp_clone/featutes/auth/controller/auth_controller_riverpod.dart';
 import 'package:whatsapp_clone/router.dart' as route;
@@ -28,8 +28,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void countryPickerSelection() {
     showCountryPicker(
       context: context,
-      showPhoneCode:
-          true, // optional. Shows phone code before the country name.
+      showPhoneCode: true, // optional. Shows phone code before the country name.
       onSelect: (Country country) {
         setState(() {
           countries = country;
@@ -39,12 +38,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  void sendOTP() {
+  Future<void> _onNextPressed() async {
+    // Send OTP to user
     String phoneNumber = phoneController.text.trim();
     if (countries != null && phoneNumber.isNotEmpty) {
-      ref
-          .read(authControllerProvider)
-          .signInWithPhoneNum(context, '+ ${countries!.phoneCode}$phoneNumber');
+      try {
+        final verificationId = await ref
+            .read(authControllerProvider)
+            .signInWithPhoneNum('+${countries!.phoneCode}$phoneNumber');
+        if(mounted){
+          context.navigateToOTP(verificationId);
+        }
+      } catch (e) {
+        showSnackBar(context: context, content: e.toString());
+      }
     } else {
       showSnackBar(context: context, content: 'fill in all required fields');
     }
@@ -67,9 +74,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
         leading: IconButton(
-          onPressed: () {
-            Navigator.pushNamed(context, route.landingScreen);
-          },
+          onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back_ios),
         ),
       ),
@@ -129,7 +134,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               SizedBox(height: size.height * 0.5),
               SizedBox(
                 width: 90,
-                child: CustomButton(text: 'NEXT', onPressed: sendOTP),
+                child: CustomButton(
+                  text: 'NEXT',
+                  onPressed: _onNextPressed,
+                ),
               ),
             ],
           ),

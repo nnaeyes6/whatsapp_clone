@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:whatsapp_clone/core/constants/colors.dart';
+import 'package:whatsapp_clone/featutes/auth/controller/auth_controller_riverpod.dart';
 import 'package:whatsapp_clone/featutes/screens/screen_widgets/contact_lists.dart';
 
-class MobileLayoutScreen extends StatelessWidget {
+class MobileLayoutScreen extends ConsumerWidget {
   const MobileLayoutScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
         length: 3,
         child: Scaffold(
@@ -15,10 +17,7 @@ class MobileLayoutScreen extends StatelessWidget {
             backgroundColor: appBarColor,
             title: const Text(
               'Whatsapp',
-              style: TextStyle(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20),
+              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 20),
             ),
             centerTitle: false,
             actions: [
@@ -30,7 +29,9 @@ class MobileLayoutScreen extends StatelessWidget {
                 ),
               ),
               IconButton(
-                onPressed: (() {}),
+                onPressed: (() {
+                  ref.read(authControllerProvider).logOut();
+                }),
                 icon: const Icon(
                   Icons.more_vert,
                   color: Colors.grey,
@@ -44,15 +45,9 @@ class MobileLayoutScreen extends StatelessWidget {
                 unselectedLabelColor: Colors.grey,
                 labelStyle: const TextStyle(fontWeight: FontWeight.w800),
                 tabs: [
-                  Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: const Text('CHATS')),
-                  Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: const Text('STATUS')),
-                  Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: const Text('CALLS')),
+                  Container(margin: const EdgeInsets.only(bottom: 10), child: const Text('CHATS')),
+                  Container(margin: const EdgeInsets.only(bottom: 10), child: const Text('STATUS')),
+                  Container(margin: const EdgeInsets.only(bottom: 10), child: const Text('CALLS')),
                 ]),
           ),
           body: const ContactsLists(),
