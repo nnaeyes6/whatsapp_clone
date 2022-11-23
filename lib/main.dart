@@ -28,17 +28,17 @@ class MyApp extends ConsumerWidget {
         appBarTheme: const AppBarTheme(color: appBarColor, elevation: 0),
       ),
       onGenerateRoute: route.controller,
-      initialRoute: ref.watch(userDataAuthProvider).when(
-          data: (user) {
-            if (user == null) {
-              return route.landingScreen;
-            }
-            return route.mobileLayoutScreen;
-          },
-          error: ((error, stackTrace) => route.landingScreen),
-          loading: () => const Loader().toString()),
+      // initialRoute: ref.watch(userDataAuthProvider).when(
+      //     data: (user) {
+      //       if (user == null) {
+      //         return route.landingScreen;
+      //       }
+      //       return route.mobileLayoutScreen;
+      //     },
+      //     error: ((error, stackTrace) => route.landingScreen),
+      //     loading: () => const Loader().toString()),
 
-      // route.landingScreen,
+      initialRoute: route.landingScreen,
       // home: const ResponsiveLayout(
       //   mobileScreenLayout: MobileLayoutScreen(),
       //   webScreenLayout: WebLayoutScreen(),
